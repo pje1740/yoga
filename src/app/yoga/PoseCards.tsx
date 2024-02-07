@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
 import PoseCard from "@/app/yoga/components/PoseCard";
+import { PoseJournal } from "@/app/yoga/types";
 
 import { POSES } from "@/app/yoga/constants/poses";
-
-interface PoseJournal {
-  poseCode: string;
-  journal: string;
-}
 
 const PoseCards = () => {
   const [journals, setJournals] = useState<PoseJournal[]>(
     POSES.ASHTANGA_PRIMARY.map((pose) => {
-      return { poseCode: pose.nameCode, journal: "" };
+      return { poseCode: pose.nameCode, text: "", images: [] };
     })
   );
 
+  // TODO: reducer로 수정
   const updateJournal = (journalIndex: number, journal: string) => {
     const newJournals = [...journals];
-    newJournals[journalIndex].journal = journal;
+    newJournals[journalIndex].text = journal;
+
+    setJournals(newJournals);
+  };
+
+  const updateImages = (journalIndex: number, images: File[]) => {
+    const newJournals = [...journals];
+    newJournals[journalIndex].images = [
+      ...newJournals[journalIndex].images,
+      ...images,
+    ];
 
     setJournals(newJournals);
   };
@@ -29,9 +36,12 @@ const PoseCards = () => {
         <PoseCard
           key={pose.nameCode}
           pose={pose}
-          journal={journals[i].journal}
+          journal={journals[i]}
           onChangeJournal={(journal) => {
             updateJournal(i, journal);
+          }}
+          onUploadImages={(images) => {
+            updateImages(i, images);
           }}
         />
       ))}

@@ -2,11 +2,12 @@ import React from "react";
 import { Label, TextField, TextArea, Input } from "react-aria-components";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
-import { PoseCode } from "../../types";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import { PoseCode, PoseJournal } from "@/app/yoga/types";
 
 interface PoseCardProps {
   pose: PoseCode;
-  journal: string;
+  journal: PoseJournal;
   onChangeJournal: (value: string) => void;
   onUploadImages?: (images: File[]) => void;
 }
@@ -24,8 +25,27 @@ const PoseCard = ({
     onChangeJournal(value);
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const images = e.target.files;
+
+    if (!images?.length) {
+      return;
+    }
+
+    const files: File[] = [];
+
+    for (let i = 0; i < images?.length; i++) {
+      const file = images.item(i);
+      if (file) {
+        files.push(file);
+      }
+    }
+
+    onUploadImages?.(files);
+  };
+
   return (
-    <div className="w-full max-w-2xl mx-auto md:p-2">
+    <div className="w-full max-w-xl mx-auto md:p-2">
       <div>
         <details className="border-solid border border-gray-200 rounded-lg md:p-4">
           <summary className="flex items-center gap-4 cursor-pointer">
@@ -49,29 +69,36 @@ const PoseCard = ({
               <TextArea
                 className="border rounded p-2 w-full h-24"
                 placeholder="수련 일지 기록"
-                value={journal}
+                value={journal.text}
                 onChange={handleJournalChange}
               />
             </TextField>
-            <div className="grid gap-1.5">
-              <Label htmlFor="image-1">수련 사진</Label>
-              <Input id="image-1" type="file" />
-            </div>
             <div className="grid grid-cols-5 gap-2">
-              <Image
-                alt="Uploaded Image 1"
-                className="aspect-square object-cover rounded-lg"
-                height={100}
-                src="/yoga/posture_placeholder.png"
-                width={100}
+              <Label
+                htmlFor="file"
+                style={{ width: "100px" }}
+                className="bg-yellow-100 aspect-square rounded-lg flex justify-center items-center cursor-pointer hover:bg-yellow-200"
+              >
+                <PlusIcon className="w-8 text-yellow-500" />
+              </Label>
+              <Input
+                accept="image/*, video/*"
+                multiple
+                type="file"
+                id="file"
+                className="bg-yellow-100 aspect-square rounded-lg flex justify-center items-center"
+                onChange={handleImageUpload}
               />
-              <Image
-                alt="Uploaded Image 2"
-                className="aspect-square object-cover rounded-lg"
-                height={100}
-                src="/yoga/posture_placeholder.png"
-                width={100}
-              />
+              {journal.images.map((image) => (
+                <Image
+                  key={image.name}
+                  alt="Uploaded Image 1"
+                  className="aspect-square object-cover rounded-lg"
+                  height={100}
+                  src={URL.createObjectURL(image)}
+                  width={100}
+                />
+              ))}
             </div>
           </div>
         </details>
